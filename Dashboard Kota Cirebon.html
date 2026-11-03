@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Dashboard Kota Cirebon</title>
+    <style>
+        :root {
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            --bg: #f4f7f8;
+            --card: #fff;
+            --tx: #12262b;
+            --mu: #5d7379;
+            --ln: #dbe5e8;
+            --ac: #0e7c86;
+            --pin: #e8590c;
+            --pin2: #c92a2a
+        }
+
+        html {
+            scroll-padding-top: env(safe-area-inset-top, 0px)
+        }
+
+        @media (prefers-color-scheme:dark) {
+            :root:not([data-theme="light"]) {
+                --bg: #0f1b1e;
+                --card: #172629;
+                --tx: #e6f1f3;
+                --mu: #92abb0;
+                --ln: #2a3f44;
+                --ac: #3cc3cf
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --bg: #0f1b1e;
+            --card: #172629;
+            --tx: #e6f1f3;
+            --mu: #92abb0;
+            --ln: #2a3f44;
+            --ac: #3cc3cf
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--tx);
+            font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif
+        }
+
+        .w {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 16px
+        }
+
+        h1 {
+            font-size: 22px;
+            margin: 4px 0
+        }
+
+        .sub {
+            color: var(--mu);
+            font-size: 13px;
+            margin: 0 0 14px
+        }
+
+        .kpi {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 14px
+        }
+
+        .c {
+            background: var(--card);
+            border: 1px solid var(--ln);
+            border-radius: 12px;
+            padding: 12px 14px
+        }
+
+        .kpi b {
+            display: block;
+            font-size: 24px;
+            color: var(--ac)
+        }
+
+        .kpi span {
+            font-size: 12px;
+            color: var(--mu)
+        }
+
+        .main {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 12px
+        }
+
+        @media(max-width:820px) {
+            .main {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px
+        }
+
+        .tabs button {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid var(--ln);
+            background: var(--card);
+            color: var(--tx);
+            border-radius: 8px;
+            cursor: pointer;
+            font: inherit
+        }
+
+        .tabs button.on {
+            background: var(--ac);
+            color: #fff;
+            border-color: var(--ac)
+        }
+
+        .map {
+            position: relative;
+            height: 520px;
+            overflow: hidden;
+            padding: 0
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            display: block
+        }
+
+        .k {
+            cursor: pointer;
+            fill: transparent;
+            stroke: #9a8fb0;
+            stroke-width: 1.6;
+            stroke-dasharray: 6 4
+        }
+
+        .k:hover {
+            fill: rgba(14, 124, 134, .12)
+        }
+
+        .k.sel {
+            stroke: #0e7c86;
+            stroke-width: 2.6;
+            fill: rgba(14, 124, 134, .1)
+        }
+
+        .heat .k {
+            fill: var(--f);
+            fill-opacity: .6
+        }
+
+        .pin {
+            cursor: pointer
+        }
+
+        .nt .k {
+            stroke: #b39ddb
+        }
+
+        #c3.nt {
+            background: linear-gradient(#0b1630, #1b2a44 70%)
+        }
+
+        .ol button.on {
+            background: var(--ac);
+            color: #fff;
+            border-color: var(--ac)
+        }
+
+        #q {
+            width: 100%;
+            margin-top: 8px;
+            padding: 8px 10px;
+            border: 1px solid var(--ln);
+            border-radius: 8px;
+            background: var(--card);
+            color: var(--tx);
+            font: inherit
+        }
+
+        .lb {
+            font-size: 13px;
+            font-weight: 600;
+            fill: var(--tx);
+            pointer-events: none;
+            text-anchor: middle
+        }
+
+        .dot {
+            fill: var(--pin);
+            stroke: #fff;
+            stroke-width: 1.5;
+            cursor: pointer
+        }
+
+        .dot.m {
+            fill: var(--pin2)
+        }
+
+        #c3 {
+            position: absolute;
+            inset: 0;
+            cursor: grab;
+            touch-action: none;
+            background: linear-gradient(#bfe0f0, #f4f7f8 70%)
+        }
+
+        #tip {
+            position: absolute;
+            left: 10px;
+            bottom: 10px;
+            right: 10px;
+            background: var(--card);
+            border: 1px solid var(--ln);
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 13px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px
+        }
+
+        th,
+        td {
+            text-align: right;
+            padding: 6px 4px;
+            border-bottom: 1px solid var(--ln)
+        }
+
+        th:first-child,
+        td:first-child {
+            text-align: left
+        }
+
+        th {
+            color: var(--mu);
+            font-weight: 500
+        }
+
+        tr.r {
+            cursor: pointer
+        }
+
+        tr.r:hover,
+        tr.sel {
+            background: var(--bg)
+        }
+
+        .bar {
+            height: 5px;
+            background: var(--ac);
+            border-radius: 3px;
+            margin-top: 3px
+        }
+
+        .ol {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px
+        }
+
+        .ol button {
+            font: inherit;
+            font-size: 12px;
+            padding: 4px 8px;
+            border: 1px solid var(--ln);
+            background: var(--card);
+            color: var(--tx);
+            border-radius: 14px;
+            cursor: pointer
+        }
+
+        .note {
+            font-size: 12px;
+            color: var(--mu);
+            margin-top: 12px
+        }
+
+        h3 {
+            font-size: 15px;
+            margin: 0 0 8px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="w">
+        <h1>Dashboard Kota Cirebon</h1>
+        <p class="sub">Data penduduk, kepala keluarga, sekolah, dan lokasi kantor pemerintahan per kecamatan</p>
+        <div class="kpi" id="kpi"></div>
+        <div class="main">
+            <div>
+                <div class="tabs"><button id="t2" class="on">Peta Biasa (2D)</button><button id="t3">Peta
+                        3D</button><button id="md" style="flex:0 0 auto">🌙 Malam</button><label
+                        style="font-size:12px;color:var(--mu);display:flex;align-items:center;gap:4px;white-space:nowrap"><input
+                            type="checkbox" id="hm"> Warna penduduk</label></div>
+                <div class="c map">
+                    <svg id="s2" viewBox="0 0 600 720"></svg>
+                    <div id="c3" hidden></div>
+                    <div id="tip">Klik wilayah atau titik kantor untuk melihat detail.</div>
+                </div>
+                <input id="q" placeholder="Cari lokasi (mis. stasiun, keraton, rumah sakit)">
+                <div class="ol" id="ch"></div>
+                <div class="ol" id="ol"></div>
+            </div>
+            <div>
+                <div class="c">
+                    <h3>Data per Kecamatan</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Kecamatan</th>
+                                <th>Penduduk</th>
+                                <th>KK</th>
+                                <th>Sekolah</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tb"></tbody>
+                    </table>
+                </div>
+                <div class="c" style="margin-top:12px" id="dt"></div>
+                <div class="c" style="margin-top:12px">
+                    <h3>🚨 Nomor Darurat</h3>
+                    <table>
+                        <tr>
+                            <td>Darurat terpadu</td>
+                            <td><a href="tel:112">112</a></td>
+                        </tr>
+                        <tr>
+                            <td>Polisi</td>
+                            <td><a href="tel:110">110</a></td>
+                        </tr>
+                        <tr>
+                            <td>Pemadam kebakaran</td>
+                            <td><a href="tel:113">113</a></td>
+                        </tr>
+                        <tr>
+                            <td>Ambulans</td>
+                            <td><a href="tel:119">119</a></td>
+                        </tr>
+                        <tr>
+                            <td>SAR / Basarnas</td>
+                            <td><a href="tel:115">115</a></td>
+                        </tr>
+                        <tr>
+                            <td>PLN</td>
+                            <td><a href="tel:123">123</a></td>
+                        </tr>
+                        <tr>
+                            <td>BPJS Kesehatan</td>
+                            <td><a href="tel:165">165</a></td>
+                        </tr>
+                        <tr>
+                            <td>Pengaduan LAPOR!</td>
+                            <td>SMS 1708</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="c" style="margin-top:12px">
+                    <h3>🗂️ Layanan Publik</h3>
+                    <div style="font-size:13px;line-height:1.7">• KTP-el, KK, akta kelahiran: Disdukcapil Kota
+                        Cirebon<br>• Pajak kendaraan dan SIM: Samsat dan Satpas<br>• Izin usaha (NIB): <a
+                            href="https://oss.go.id" target="_blank" rel="noopener">oss.go.id</a><br>• Cek bantuan
+                        sosial: <a href="https://cekbansos.kemensos.go.id" target="_blank"
+                            rel="noopener">cekbansos.kemensos.go.id</a><br>• Pengaduan layanan: <a
+                            href="https://lapor.go.id" target="_blank" rel="noopener">lapor.go.id</a><br><span
+                            style="color:var(--mu)">Cari lokasi kantor dan fasilitas di peta, lalu klik titiknya untuk
+                            rute.</span></div>
+                </div>
+            </div>
+        </div>
+        <p class="note">Catatan: angka penduduk, KK, dan sekolah adalah perkiraan berbasis Sensus Penduduk 2020 dan
+            perlu dicek ulang dengan BPS Kota Cirebon / Dapodik. Batas wilayah, jaringan jalan, dan bangunan digambar
+            skematis (bukan data survei), dan koordinat kantor adalah perkiraan. Semua bisa diedit di objek K dan O pada
+            kode.</p>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        var K = [{
+                id: 'Harjamukti',
+                pop: 128300,
+                kk: 37700,
+                km: 18.6,
+                sd: 50,
+                smp: 14,
+                sma: 12,
+                poly: [
+                    [108.553, -6.728],
+                    [108.565, -6.730],
+                    [108.580, -6.725],
+                    [108.585, -6.745],
+                    [108.575, -6.770],
+                    [108.555, -6.772],
+                    [108.540, -6.760],
+                    [108.545, -6.745]
+                ]
+            },
+            {
+                id: 'Kesambi',
+                pop: 88500,
+                kk: 26000,
+                km: 8.0,
+                sd: 40,
+                smp: 11,
+                sma: 13,
+                poly: [
+                    [108.527, -6.705],
+                    [108.545, -6.700],
+                    [108.545, -6.710],
+                    [108.552, -6.716],
+                    [108.553, -6.728],
+                    [108.545, -6.745],
+                    [108.528, -6.735]
+                ]
+            },
+            {
+                id: 'Kejaksan',
+                pop: 42000,
+                kk: 12400,
+                km: 4.4,
+                sd: 22,
+                smp: 6,
+                sma: 8,
+                poly: [
+                    [108.545, -6.700],
+                    [108.560, -6.695],
+                    [108.567, -6.703],
+                    [108.565, -6.713],
+                    [108.552, -6.716],
+                    [108.545, -6.710]
+                ]
+            },
+            {
+                id: 'Lemahwungkuk',
+                pop: 49000,
+                kk: 14400,
+                km: 3.5,
+                sd: 22,
+                smp: 6,
+                sma: 6,
+                poly: [
+                    [108.560, -6.695],
+                    [108.575, -6.690],
+                    [108.585, -6.700],
+                    [108.580, -6.725],
+                    [108.565, -6.730],
+                    [108.565, -6.713],
+                    [108.567, -6.703]
+                ]
+            },
+            {
+                id: 'Pekalipan',
+                pop: 25500,
+                kk: 7500,
+                km: 1.6,
+                sd: 12,
+                smp: 4,
+                sma: 5,
+                poly: [
+                    [108.552, -6.716],
+                    [108.565, -6.713],
+                    [108.565, -6.730],
+                    [108.553, -6.728]
+                ]
+            }
+        ];
+        var O = [{
+                n: 'Balai Kota Cirebon',
+                t: 'Pemerintah Kota',
+                lng: 108.5576,
+                lat: -6.7112,
+                m: 1
+            },
+            {
+                n: 'Gedung DPRD Kota Cirebon',
+                t: 'Legislatif',
+                lng: 108.5590,
+                lat: -6.7088
+            },
+            {
+                n: 'Polres Cirebon Kota',
+                t: 'Kepolisian',
+                lng: 108.5560,
+                lat: -6.7195
+            },
+            {
+                n: 'Kejaksaan Negeri Cirebon',
+                t: 'Kejaksaan',
+                lng: 108.5610,
+                lat: -6.7140
+            },
+            {
+                n: 'Pengadilan Negeri Cirebon',
+                t: 'Peradilan',
+                lng: 108.5545,
+                lat: -6.7160
+            },
+            {
+                n: 'Kantor Kec. Kejaksan',
+                t: 'Kecamatan',
+                lng: 108.554,
+                lat: -6.706
+            },
+            {
+                n: 'Kantor Kec. Lemahwungkuk',
+                t: 'Kecamatan',
+                lng: 108.572,
+                lat: -6.717
+            },
+            {
+                n: 'Kantor Kec. Pekalipan',
+                t: 'Kecamatan',
+                lng: 108.559,
+                lat: -6.722
+            },
+            {
+                n: 'Kantor Kec. Kesambi',
+                t: 'Kecamatan',
+                lng: 108.537,
+                lat: -6.722
+            },
+            {
+                n: 'Kantor Kec. Harjamukti',
+                t: 'Kecamatan',
+                lng: 108.563,
+                lat: -6.748
+            }
+        ];
+        var CATS = {
+                gov: ['Pemerintahan', '#ea4335', '🏛️'],
+                kes: ['Kesehatan', '#d6336c', '🏥', 0xd6336c],
+                trans: ['Transportasi', '#1c7ed6', '🚉', 0x1c7ed6],
+                wisata: ['Wisata & Ruang Publik', '#f08c00', '🏯', 0xf08c00],
+                pasar: ['Pasar', '#9c36b5', '🛒', 0x9c36b5],
+                ibadah: ['Ibadah', '#5f3dc4', '🕌', 0x5f3dc4]
+            },
+            on = {};
+        Object.keys(CATS).forEach(function (k) {
+            on[k] = 1
+        });
+        O.forEach(function (o) {
+            o.c = o.c || 'gov'
+        });
+        [
+            ['RSUD Gunung Jati', 'Rumah Sakit', 'kes', 108.5445, -6.7145],
+            ['RS Sumber Kasih', 'Rumah Sakit', 'kes', 108.5485, -6.7170],
+            ['Stasiun Kejaksan', 'Stasiun KA', 'trans', 108.5552, -6.7064],
+            ['Stasiun Prujakan', 'Stasiun KA', 'trans', 108.5600, -6.7250],
+            ['Terminal Harjamukti', 'Terminal Bus', 'trans', 108.5520, -6.7570],
+            ['Pelabuhan Cirebon', 'Pelabuhan', 'trans', 108.5720, -6.7000],
+            ['Keraton Kasepuhan', 'Wisata Budaya', 'wisata', 108.5683, -6.7226],
+            ['Keraton Kanoman', 'Wisata Budaya', 'wisata', 108.5700, -6.7190],
+            ['Goa Sunyaragi', 'Wisata Sejarah', 'wisata', 108.5385, -6.7265],
+            ['Alun-alun Kejaksan', 'Ruang Publik', 'wisata', 108.5580, -6.7080],
+            ['Pasar Pagi', 'Pasar', 'pasar', 108.5615, -6.7185],
+            ['Pasar Kanoman', 'Pasar', 'pasar', 108.5710, -6.7170],
+            ['Masjid Agung Sang Cipta Rasa', 'Tempat Ibadah', 'ibadah', 108.5668, -6.7212]
+        ].forEach(function (f) {
+            O.push({
+                n: f[0],
+                t: f[1],
+                c: f[2],
+                lng: f[3],
+                lat: f[4]
+            })
+        });
+        var S = 7000,
+            fmt = function (n) {
+                return n.toLocaleString('id-ID')
+            },
+            $ = function (i) {
+                return document.getElementById(i)
+            };
+
+        function P(lng, lat) {
+            return [(lng - 108.52) * S, (-6.68 - lat) * S]
+        }
+
+        function pip(pt, poly) {
+            var x = pt[0],
+                y = pt[1],
+                r = false;
+            for (var i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+                var a = poly[i],
+                    b = poly[j];
+                if ((a[1] > y) != (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) r = !r
+            }
+            return r
+        }
+        K.forEach(function (k) {
+            k.p = k.poly.map(function (q) {
+                return P(q[0], q[1])
+            });
+            k.sek = k.sd + k.smp + k.sma;
+            k.dens = Math.round(k.pop / k.km)
+        });
+        O.forEach(function (o) {
+            o.p = P(o.lng, o.lat);
+            o.k = K.filter(function (k) {
+                return pip(o.p, k.p)
+            })[0] || K[0]
+        });
+        var mn = Math.min.apply(0, K.map(function (k) {
+                return k.pop
+            })),
+            mx = Math.max.apply(0, K.map(function (k) {
+                return k.pop
+            }));
+
+        function col(k) {
+            var t = (k.pop - mn) / (mx - mn);
+            return 'hsl(190,65%,' + (82 - 45 * t) + '%)'
+        }
+        var T = function (f) {
+            return K.reduce(function (a, k) {
+                return a + k[f]
+            }, 0)
+        };
+        $('kpi').innerHTML = [
+            ['Jumlah Penduduk', fmt(T('pop'))],
+            ['Kepala Keluarga', fmt(T('kk'))],
+            ['Sekolah (SD-SMA/SMK)', fmt(T('sek'))],
+            ['Kantor Pemerintahan', O.filter(function (o) {
+                return o.c == 'gov'
+            }).length],
+            ['Titik Fasilitas Publik', O.length]
+        ].map(function (x) {
+            return '<div class="c kpi"><b>' + x[1] + '</b><span>' + x[0] + '</span></div>'
+        }).join('');
+        $('tb').innerHTML = K.map(function (k) {
+            return '<tr class="r" data-k="' + k.id + '"><td>' + k.id + '<div class="bar" style="width:' + (k
+                    .pop / mx * 100) + '%"></div></td><td>' + fmt(k.pop) + '</td><td>' + fmt(k.kk) +
+                '</td><td>' + k.sek + '</td></tr>'
+        }).join('');
+        $('ol').innerHTML = O.map(function (o, i) {
+            return '<button data-o="' + i + '">' + o.n + '</button>'
+        }).join('');
+        var svg = '';
+        K.forEach(function (k) {
+            svg += '<polygon class="k" data-k="' + k.id + '" fill="' + col(k) + '" points="' + k.p.map(
+                function (q) {
+                    return q.join(',')
+                }).join(' ') + '"/>'
+        });
+        K.forEach(function (k) {
+            var c = k.p.reduce(function (a, q) {
+                return [a[0] + q[0] / k.p.length, a[1] + q[1] / k.p.length]
+            }, [0, 0]);
+            svg += '<text class="lb" x="' + c[0] + '" y="' + (c[1] + 34) + '">' + k.id + '</text>'
+        });
+        O.forEach(function (o, i) {
+            svg += '<circle class="dot' + (o.m ? ' m' : '') + '" data-o="' + i + '" cx="' + o.p[0] + '" cy="' +
+                o.p[1] + '" r="' + (o.m ? 8 : 5) + '"><title>' + o.n + '</title></circle>'
+        });
+        svg +=
+            '<text x="560" y="40" class="lb">U ↑</text><text x="20" y="40" style="font-size:12px;fill:var(--mu)">Laut Jawa (utara)</text>';
+        var ROADS = [{
+                n: 'Jl. Siliwangi',
+                w: 5.5,
+                a: 1,
+                p: [
+                    [108.557, -6.699],
+                    [108.557, -6.711],
+                    [108.558, -6.722],
+                    [108.560, -6.735],
+                    [108.562, -6.752],
+                    [108.565, -6.768]
+                ]
+            },
+            {
+                n: 'Jl. Cipto Mangunkusumo',
+                w: 5.5,
+                a: 1,
+                p: [
+                    [108.528, -6.722],
+                    [108.540, -6.722],
+                    [108.552, -6.719],
+                    [108.566, -6.718],
+                    [108.582, -6.714]
+                ]
+            },
+            {
+                n: 'Jl. Kartini',
+                w: 4.5,
+                a: 1,
+                p: [
+                    [108.557, -6.699],
+                    [108.570, -6.700],
+                    [108.580, -6.704]
+                ]
+            },
+            {
+                n: 'Jl. Evakuasi',
+                w: 3.5,
+                p: [
+                    [108.545, -6.745],
+                    [108.553, -6.735],
+                    [108.558, -6.722]
+                ]
+            },
+            {
+                n: 'Jl. Kesambi',
+                w: 3.5,
+                p: [
+                    [108.528, -6.712],
+                    [108.540, -6.714],
+                    [108.552, -6.716]
+                ]
+            },
+            {
+                n: 'Jl. Tuparev',
+                w: 4.5,
+                a: 1,
+                p: [
+                    [108.535, -6.735],
+                    [108.548, -6.738],
+                    [108.562, -6.735],
+                    [108.578, -6.735]
+                ]
+            },
+            {
+                n: 'Jl. Pekalipan',
+                w: 3.5,
+                p: [
+                    [108.565, -6.713],
+                    [108.568, -6.722],
+                    [108.568, -6.732]
+                ]
+            },
+            {
+                n: 'Jl. Ampera',
+                w: 3.5,
+                p: [
+                    [108.570, -6.740],
+                    [108.570, -6.755],
+                    [108.564, -6.768]
+                ]
+            }
+        ];
+        ROADS.forEach(function (r) {
+            r.s = r.p.map(function (q) {
+                return P(q[0], q[1])
+            })
+        });
+        var SEAP = [
+            [108.50, -6.66],
+            [108.62, -6.66],
+            [108.62, -6.705],
+            [108.585, -6.700],
+            [108.575, -6.690],
+            [108.560, -6.695],
+            [108.545, -6.700],
+            [108.527, -6.705],
+            [108.50, -6.705]
+        ].map(function (q) {
+            return P(q[0], q[1])
+        });
+        var pt = function (a) {
+            return a.map(function (q) {
+                return q.join(',')
+            }).join(' ')
+        };
+
+        function build2d() {
+            var s = '<defs><clipPath id="cl">' + K.map(function (k) {
+                    return '<polygon points="' + pt(k.p) + '"/>'
+                }).join('') +
+                '</clipPath></defs><rect x="-50" y="-60" width="700" height="840" fill="#f2efe9"/><polygon points="' +
+                pt(SEAP) +
+                '" fill="#aad3df"/><text x="250" y="34" text-anchor="middle" font-style="italic" font-size="13" fill="#4d8fb0">Laut Jawa</text>';
+            s += '<g clip-path="url(#cl)"><rect x="-50" y="-60" width="700" height="840" fill="#f7f5f0"/>';
+            [
+                [266, 196, 11, 7],
+                [175, 532, 30, 18],
+                [385, 539, 22, 14],
+                [105, 336, 18, 10]
+            ].forEach(function (e) {
+                s += '<ellipse cx="' + e[0] + '" cy="' + e[1] + '" rx="' + e[2] + '" ry="' + e[3] +
+                    '" fill="#c8e6c0"/>'
+            });
+            var d = '';
+            for (var i = -100; i < 700; i += 24) d += 'M' + i + ' -200V1000M-200 ' + (i + 100) + 'H1000';
+            s += '<path transform="rotate(-14 250 380)" d="' + d +
+                '" stroke="#fff" stroke-width="2.2" fill="none"/></g>';
+            [1, 0].forEach(function (cs) {
+                ROADS.forEach(function (r) {
+                    s += '<polyline points="' + pt(r.s) +
+                        '" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="' + (cs ?
+                            (r.a ? '#e0a826' : '#c4c4c4') : (r.a ? '#fcd56b' : '#fff')) +
+                        '" stroke-width="' + (cs ? r.w + 2 : r.w) + '"/>'
+                })
+            });
+            ROADS.forEach(function (r) {
+                var i = Math.floor((r.s.length - 2) / 2),
+                    a = r.s[i],
+                    b = r.s[i + 1],
+                    g = Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI;
+                if (Math.abs(g) > 90) g += 180;
+                s += '<text transform="translate(' + (a[0] + b[0]) / 2 + ',' + (a[1] + b[1]) / 2 + ') rotate(' +
+                    g +
+                    ')" text-anchor="middle" dy="3" font-size="8.5" fill="#5f6368" style="paint-order:stroke;stroke:#fff;stroke-width:3">' +
+                    r.n + '</text>'
+            });
+            K.forEach(function (k) {
+                s += '<polygon class="k" data-k="' + k.id + '" style="--f:' + col(k) + '" points="' + pt(k.p) +
+                    '"/>'
+            });
+            K.forEach(function (k) {
+                var c = k.p.reduce(function (a, q) {
+                    return [a[0] + q[0] / k.p.length, a[1] + q[1] / k.p.length]
+                }, [0, 0]);
+                s += '<text x="' + c[0] + '" y="' + (c[1] + 38) +
+                    '" text-anchor="middle" font-size="11" letter-spacing="1.5" fill="#70757a" style="pointer-events:none;paint-order:stroke;stroke:#f7f5f0;stroke-width:3">' +
+                    k.id.toUpperCase() + '</text>'
+            });
+            O.forEach(function (o, i) {
+                s += '<g class="pin" data-c="' + o.c + '" style="' + (on[o.c] ? '' : 'display:none') +
+                    '" data-o="' + i + '" transform="translate(' + o.p[0] + ',' + o.p[1] + ') scale(' + (o.m ?
+                        1.25 : .9) + ')"><title>' + o.n +
+                    '</title><path d="M0 0C-6-9-9-13-9-17A9 9 0 1 1 9-17C9-13 6-9 0 0Z" fill="' + CATS[o.c][1] +
+                    '" stroke="#0005"/>' + (o.c == 'gov' ? '<circle cy="-17" r="3.5" fill="#fff"/>' :
+                        '<circle cy="-17" r="6.5" fill="#fff"/><text y="-13.5" text-anchor="middle" font-size="9">' +
+                        CATS[o.c][2] + '</text>') + '</g>'
+            });
+            s += '<text x="' + (O[0].p[0] + 14) + '" y="' + (O[0].p[1] - 14) +
+                '" font-size="10" font-weight="600" fill="#202124" style="paint-order:stroke;stroke:#fff;stroke-width:3">Balai Kota</text><g transform="translate(560,40)"><circle r="16" fill="#fff" stroke="#ddd"/><path d="M0-12L5 4 0 1-5 4Z" fill="#ea4335"/><text y="14" text-anchor="middle" font-size="8" fill="#555">U</text></g>';
+            return paint(s)
+        }
+        var NM = {
+            '#f2efe9': '#242f3e',
+            '#f7f5f0': '#2c3a4b',
+            '#aad3df': '#17263c',
+            '#4d8fb0': '#4a6a8a',
+            '#c8e6c0': '#263c3f',
+            '#fcd56b': '#746855',
+            '#e0a826': '#1f2835',
+            '#c4c4c4': '#212a37',
+            '#5f6368': '#9ca5b3',
+            '#70757a': '#9ca5b3',
+            '#202124': '#e8eaed',
+            '#fff': '#38414e'
+        };
+
+        function paint(s) {
+            if (night)
+                for (var k in NM) s = s.split(k).join(NM[k]);
+            return s
+        }
+        var GM, SM, BM, LT = [],
+            LP = [],
+            night = (function (h) {
+                return h >= 18 || h < 5
+            })(new Date().getHours());
+
+        function setMode(n) {
+            night = n;
+            document.documentElement.dataset.theme = n ? 'dark' : 'light';
+            var sv = $('s2'),
+                sk = document.querySelector('tr.sel');
+            sv.innerHTML = build2d();
+            sv.classList.toggle('nt', n);
+            sv.querySelectorAll('.k').forEach(function (e) {
+                e.classList.toggle('sel', !!sk && e.dataset.k == sk.dataset.k)
+            });
+            $('c3').classList.toggle('nt', n);
+            $('md').textContent = n ? '☀️ Siang' : '🌙 Malam';
+            if (ready) {
+                LT[0].intensity = n ? .3 : .7;
+                LT[1].intensity = n ? .2 : .7;
+                LT[1].color.setHex(n ? 0x8fa0ff : 0xffffff);
+                GM.color.setHex(n ? 0x252f3a : 0xe6e3da);
+                SM.color.setHex(n ? 0x15304d : 0x7fb8d6);
+                BM.emissive.setHex(n ? 0x4d3b12 : 0);
+                LP.forEach(function (l) {
+                    l.visible = n
+                });
+                draw()
+            }
+        }
+        $('md').onclick = function () {
+            setMode(!night)
+        };
+
+        function renderList() {
+            var q = $('q').value.toLowerCase();
+            $('ol').innerHTML = O.map(function (o, i) {
+                return o.n.toLowerCase().indexOf(q) > -1 && on[o.c] ? '<button data-o="' + i + '">' + CATS[o.c][
+                    2
+                ] + ' ' + o.n + '</button>' : ''
+            }).join('')
+        }
+        $('q').oninput = renderList;
+        $('ch').innerHTML = Object.keys(CATS).map(function (k) {
+            return '<button class="ch on" data-c="' + k + '">' + CATS[k][2] + ' ' + CATS[k][0] + '</button>'
+        }).join('');
+        renderList();
+        document.addEventListener('click', function (e) {
+            var c = e.target.closest('.ch');
+            if (!c) return;
+            var k = c.dataset.c;
+            on[k] = !on[k];
+            c.classList.toggle('on');
+            document.querySelectorAll('.pin').forEach(function (p) {
+                p.style.display = on[p.dataset.c] ? '' : 'none'
+            });
+            if (pins) pins.forEach(function (p, i) {
+                p.visible = !!on[O[i].c]
+            });
+            renderList();
+            draw()
+        });
+        setMode(night);
+        $('hm').onchange = function () {
+            $('s2').classList.toggle('heat', this.checked)
+        };
+        var cars = [],
+            last = 0,
+            rs = 7;
+
+        function rnd() {
+            rs = rs * 16807 % 2147483647;
+            return rs / 2147483647
+        }
+
+        function nearRoad(x, y) {
+            for (var i = 0; i < ROADS.length; i++) {
+                var s = ROADS[i].s;
+                for (var j = 0; j < s.length - 1; j++) {
+                    var a = s[j],
+                        b = s[j + 1],
+                        dx = b[0] - a[0],
+                        dy = b[1] - a[1],
+                        t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / (dx * dx + dy * dy))),
+                        ex = a[0] + t * dx - x,
+                        ey = a[1] + t * dy - y;
+                    if (ex * ex + ey * ey < Math.pow(ROADS[i].w + 3, 2)) return true
+                }
+            }
+            return false
+        }
+
+        function moveCar(c, dt) {
+            var u = c.userData,
+                r = u.r,
+                L = r.c[r.c.length - 1];
+            u.d = (u.d + u.v * dt * u.dir + L) % L;
+            var i = 0;
+            while (i < r.c.length - 2 && r.c[i + 1] < u.d) i++;
+            var a = r.l[i],
+                b = r.l[i + 1],
+                f = (u.d - r.c[i]) / (r.c[i + 1] - r.c[i]),
+                dx = b[0] - a[0],
+                dy = b[1] - a[1],
+                l = Math.hypot(dx, dy),
+                ux = dx / l * u.dir,
+                uy = dy / l * u.dir;
+            c.position.set(a[0] + dx * f + uy * 1.1, a[1] + dy * f - ux * 1.1, 3.2);
+            c.rotation.z = Math.atan2(uy, ux)
+        }
+
+        function loop(t) {
+            requestAnimationFrame(loop);
+            var dt = Math.min(.05, (t - last) / 1000 || 0);
+            last = t;
+            if ($('c3').hidden || !ready) return;
+            cars.forEach(function (c) {
+                moveCar(c, dt)
+            });
+            draw()
+        }
+
+        function addCity() {
+            var L = function (q) {
+                    return new THREE.Vector2(q[0] - 300, 360 - q[1])
+                },
+                DS = THREE.DoubleSide;
+            var g = new THREE.Mesh(new THREE.PlaneGeometry(1400, 1400), new THREE.MeshLambertMaterial({
+                color: 0xe6e3da,
+                side: DS
+            }));
+            g.position.z = -.5;
+            G.add(g);
+            GM = g.material;
+            var sea = new THREE.Mesh(new THREE.ShapeGeometry(new THREE.Shape(SEAP.map(L))), new THREE
+                .MeshLambertMaterial({
+                    color: 0x7fb8d6,
+                    side: DS
+                }));
+            sea.position.z = -.2;
+            G.add(sea);
+            SM = sea.material;
+            ROADS.forEach(function (r) {
+                var pts = r.s.map(function (q) {
+                    return [q[0] - 300, 360 - q[1]]
+                });
+                r.l = pts;
+                r.c = [0];
+                for (var i = 0; i < pts.length - 1; i++) {
+                    var a = pts[i],
+                        b = pts[i + 1],
+                        dx = b[0] - a[0],
+                        dy = b[1] - a[1],
+                        len = Math.hypot(dx, dy);
+                    r.c.push(r.c[i] + len);
+                    var m = new THREE.Mesh(new THREE.PlaneGeometry(len + r.w * .5, r.w), new THREE
+                        .MeshLambertMaterial({
+                            color: r.a ? 0x59636e : 0x6b747d,
+                            side: DS
+                        }));
+                    m.position.set((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, 3.1);
+                    m.rotation.z = Math.atan2(dy, dx);
+                    G.add(m)
+                }
+                for (var n = 0; n < 4; n++) {
+                    var c = new THREE.Group(),
+                        cl = [0xe03131, 0x1971c2, 0xf08c00, 0x2f9e44, 0xf1f3f5, 0x343a40][Math.floor(rnd() *
+                        6)];
+                    var b1 = new THREE.Mesh(new THREE.BoxGeometry(4.2, 2, 1.3), new THREE.MeshLambertMaterial({
+                        color: cl
+                    }));
+                    b1.position.z = .65;
+                    c.add(b1);
+                    var t1 = new THREE.Mesh(new THREE.BoxGeometry(2, 1.8, 1), new THREE.MeshLambertMaterial({
+                        color: 0xdce3e8
+                    }));
+                    t1.position.set(-.3, 0, 1.6);
+                    c.add(t1);
+                    var hl = new THREE.Mesh(new THREE.BoxGeometry(.3, 1.6, .4), new THREE.MeshBasicMaterial({
+                        color: 0xfff3a0
+                    }));
+                    hl.position.set(2.1, 0, .7);
+                    hl.visible = night;
+                    c.add(hl);
+                    LP.push(hl);
+                    c.userData = {
+                        r: r,
+                        d: rnd() * r.c[r.c.length - 1],
+                        v: 18 + rnd() * 14,
+                        dir: n % 2 ? -1 : 1
+                    };
+                    moveCar(c, 0);
+                    G.add(c);
+                    cars.push(c)
+                }
+            });
+            var bl = [],
+                pal = [0xe3dccf, 0xd3cdc2, 0xc9d3d8, 0xefe4cf, 0xb9c5cd, 0xf2d9c4];
+            K.forEach(function (k) {
+                var xs = k.p.map(function (q) {
+                        return q[0]
+                    }),
+                    ys = k.p.map(function (q) {
+                        return q[1]
+                    });
+                for (var x = Math.min.apply(0, xs); x < Math.max.apply(0, xs); x += 7)
+                    for (var y = Math.min.apply(0, ys); y < Math.max.apply(0, ys); y += 7) {
+                        var px = x + rnd() * 3,
+                            py = y + rnd() * 3;
+                        if (rnd() > .08 + k.dens / 32000 || !pip([px, py], k.p) || nearRoad(px, py)) continue;
+                        bl.push([px - 300, 360 - py, 3 + rnd() * 3.2, 3 + rnd() * 3.2, 2 + rnd() * rnd() * 16,
+                            pal[Math.floor(rnd() * 6)]
+                        ])
+                    }
+            });
+            var im = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({
+                    color: 0xffffff
+                }), bl.length),
+                d = new THREE.Object3D(),
+                cc = new THREE.Color();
+            bl.forEach(function (b, i) {
+                d.position.set(b[0], b[1], 3 + b[4] / 2);
+                d.scale.set(b[2], b[3], b[4]);
+                d.updateMatrix();
+                im.setMatrixAt(i, d.matrix);
+                im.setColorAt(i, cc.setHex(b[5]))
+            });
+            G.add(im);
+            BM = im.material
+        }
+
+        function selK(id) {
+            var k = K.filter(function (x) {
+                return x.id == id
+            })[0];
+            document.querySelectorAll('.k').forEach(function (e) {
+                e.classList.toggle('sel', e.dataset.k == id)
+            });
+            document.querySelectorAll('tr.r').forEach(function (e) {
+                e.classList.toggle('sel', e.dataset.k == id)
+            });
+            $('dt').innerHTML = '<h3>Kecamatan ' + k.id + '</h3><table><tr><td>Penduduk</td><td>' + fmt(k.pop) +
+                ' jiwa</td></tr><tr><td>Kepala keluarga</td><td>' + fmt(k.kk) + '</td></tr><tr><td>Luas</td><td>' + k
+                .km + ' km²</td></tr><tr><td>Kepadatan</td><td>' + fmt(k.dens) +
+                ' jiwa/km²</td></tr><tr><td>SD</td><td>' + k.sd + '</td></tr><tr><td>SMP</td><td>' + k.smp +
+                '</td></tr><tr><td>SMA/SMK</td><td>' + k.sma + '</td></tr></table>';
+            $('tip').innerHTML = '<b>' + k.id + '</b>: ' + fmt(k.pop) + ' jiwa, ' + fmt(k.kk) + ' KK, ' + k.sek +
+                ' sekolah'
+        }
+
+        function selO(i) {
+            var o = O[i];
+            $('tip').innerHTML = '<b>' + o.n + '</b> (' + o.t + ') · Kec. ' + o.k.id + ' · ' + o.lat.toFixed(4) + ', ' +
+                o.lng.toFixed(4) +
+                ' · <a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + o
+                .lat + ',' + o.lng + '">Rute di Google Maps ↗</a>';
+            if (pins) pins.forEach(function (p, j) {
+                p.scale.setScalar(j == i ? 1.8 : 1)
+            });
+            draw()
+        }
+        document.addEventListener('click', function (e) {
+            var t = e.target.closest('[data-o]');
+            if (t) {
+                selO(+t.dataset.o);
+                return
+            }
+            t = e.target.closest('[data-k]');
+            if (t) selK(t.dataset.k)
+        });
+        selK('Harjamukti');
+        var pins = null,
+            R, Sc, Cm, G, yaw = 0.3,
+            pit = 0.85,
+            dist = 620,
+            ready = false;
+
+        function draw() {
+            if (!ready) return;
+            Cm.position.set(dist * Math.sin(yaw) * Math.cos(pit), dist * Math.sin(pit), dist * Math.cos(yaw) * Math.cos(
+                pit));
+            Cm.lookAt(0, 0, 0);
+            R.render(Sc, Cm)
+        }
+
+        function size() {
+            var e = $('c3');
+            R.setSize(e.clientWidth, e.clientHeight);
+            Cm.aspect = e.clientWidth / e.clientHeight;
+            Cm.updateProjectionMatrix();
+            draw()
+        }
+
+        function init3d() {
+            var el = $('c3');
+            try {
+                R = new THREE.WebGLRenderer({
+                    antialias: true,
+                    alpha: true
+                })
+            } catch (x) {
+                el.innerHTML = '<p style="padding:20px">WebGL tidak tersedia di perangkat ini.</p>';
+                return
+            }
+            el.appendChild(R.domElement);
+            Sc = new THREE.Scene();
+            Cm = new THREE.PerspectiveCamera(45, 1, 1, 3000);
+            Sc.add(new THREE.AmbientLight(0xffffff, .7));
+            var dl = new THREE.DirectionalLight(0xffffff, .7);
+            dl.position.set(200, 400, 300);
+            Sc.add(dl);
+            G = new THREE.Group();
+            G.rotation.x = -Math.PI / 2;
+            Sc.add(G);
+            K.forEach(function (k) {
+                var sh = new THREE.Shape(k.p.map(function (q) {
+                    return new THREE.Vector2(q[0] - 300, 360 - q[1])
+                }));
+                k.h = 3;
+                var g = new THREE.ExtrudeGeometry(sh, {
+                    depth: k.h,
+                    bevelEnabled: false
+                });
+                var m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({
+                    color: new THREE.Color(col(k))
+                }));
+                G.add(m);
+                G.add(new THREE.LineSegments(new THREE.EdgesGeometry(g), new THREE.LineBasicMaterial({
+                    color: 0x1b4a50
+                })))
+            });
+            pins = [];
+            var hit = [];
+            O.forEach(function (o, i) {
+                var gp = new THREE.Group();
+                gp.position.set(o.p[0] - 300, 360 - o.p[1], o.k.h);
+                var c = o.c == 'gov' ? (o.m ? 0xc92a2a : 0xe8590c) : CATS[o.c][3];
+                var pole = new THREE.Mesh(new THREE.CylinderGeometry(.8, .8, 16, 6), new THREE
+                    .MeshBasicMaterial({
+                        color: c
+                    }));
+                pole.rotation.x = Math.PI / 2;
+                pole.position.z = 8;
+                gp.add(pole);
+                var b = new THREE.Mesh(new THREE.SphereGeometry(o.m ? 7 : 4.5, 16, 12), new THREE
+                    .MeshBasicMaterial({
+                        color: c
+                    }));
+                b.position.z = 17;
+                b.userData.i = i;
+                gp.add(b);
+                hit.push(b);
+                G.add(gp);
+                pins.push(gp)
+            });
+            addCity();
+            LT = [Sc.children[0], Sc.children[1]];
+            ready = true;
+            setMode(night);
+            size();
+            requestAnimationFrame(loop);
+            var dn = null,
+                mv = 0;
+            el.addEventListener('pointerdown', function (e) {
+                dn = [e.clientX, e.clientY];
+                mv = 0;
+                el.setPointerCapture(e.pointerId)
+            });
+            el.addEventListener('pointermove', function (e) {
+                if (!dn) return;
+                var dx = e.clientX - dn[0],
+                    dy = e.clientY - dn[1];
+                mv += Math.abs(dx) + Math.abs(dy);
+                dn = [e.clientX, e.clientY];
+                yaw -= dx * .008;
+                pit = Math.max(.15, Math.min(1.5, pit + dy * .006));
+                draw()
+            });
+            el.addEventListener('pointerup', function (e) {
+                dn = null;
+                if (mv < 5) {
+                    var r = el.getBoundingClientRect(),
+                        ms = new THREE.Vector2((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r
+                            .height) * 2 + 1),
+                        rc = new THREE.Raycaster();
+                    rc.setFromCamera(ms, Cm);
+                    var h = rc.intersectObjects(hit)[0];
+                    if (h && on[O[h.object.userData.i].c]) selO(h.object.userData.i)
+                }
+            });
+            el.addEventListener('wheel', function (e) {
+                e.preventDefault();
+                dist = Math.max(250, Math.min(1100, dist + e.deltaY * .5));
+                draw()
+            }, {
+                passive: false
+            });
+            window.addEventListener('resize', function () {
+                if (ready && !el.hidden) size()
+            })
+        }
+
+        function tab(d) {
+            $('s2').style.display = d ? 'none' : 'block';
+            $('c3').hidden = !d;
+            $('t2').classList.toggle('on', !d);
+            $('t3').classList.toggle('on', d);
+            if (d) {
+                if (!ready && !R) init3d();
+                else size()
+            }
+        }
+        $('t2').onclick = function () {
+            tab(false)
+        };
+        $('t3').onclick = function () {
+            tab(true)
+        };
+    </script>
+</body>
+
+</html>
